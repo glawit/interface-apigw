@@ -71,34 +71,61 @@ def entry_point(context, event, handler):
         },
     }
 
-    body = event.get(
-        'body',
-    )
     headers = event['headers']
     is_base64_encoded = event['isBase64Encoded']
-    path_variables = event.get(
-        'pathParameters',
-    )
-    urlparams = event.get(
-        'queryStringParameters',
-    )
-
-    if is_base64_encoded:
-        logger.debug(
-            'request body is Base64-encoded',
-        )
-
-        body = base64.b64decode(
-            body,
-            validate=True,
-        )
 
     request = {
-        'body': body,
         'headers': headers,
-        'path_variables': path_variables,
-        'urlparams': urlparams,
     }
+
+    try:
+        body = event['body']
+    except KeyError:
+        logger.debug(
+            'request has no body',
+        )
+    else:
+        logger.debug(
+            'request has a body',
+        )
+
+        if is_base64_encoded:
+            logger.debug(
+                'request body is Base64-encoded',
+            )
+
+            body = base64.b64decode(
+                body,
+                validate=True,
+            )
+
+        request['body'] = body
+
+    try:
+        path_parameters = event['pathParameters']
+    except KeyError:
+        logger.debug(
+            'request has no path parameters',
+        )
+    else:
+        logger.debug(
+            'request has path parameters',
+        )
+
+        request['path_variables'] = path_parameters
+
+    try:
+        query_string_parameters = event['queryStringParameters']
+    except KeyError:
+        logger.debug(
+            'request has no query string parameters',
+        )
+    else:
+        logger.debug(
+            'request has query string parameters',
+        )
+
+        request['urlparams'] = query_string_parameters
 
     session = {
         'boto3': {
