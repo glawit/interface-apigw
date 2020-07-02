@@ -54,6 +54,13 @@ def entry_point(context, event, handler):
         github_repo,
     )
 
+    locktable = os.environ['LOCKTABLE']
+
+    logger.debug(
+        'locktable: %s',
+        locktable,
+    )
+
     config = {
         'API': {
             'endpoint': api_endpoint,
@@ -69,6 +76,7 @@ def entry_point(context, event, handler):
             'bucket_name': stage_variables['store_bucket'],
             'storage_class': stage_variables['storage_class'],
         },
+        'locktable': locktable,
     }
 
     headers = event['headers']
