@@ -45,6 +45,33 @@ def entry_point(context, event, handler):
         api_endpoint,
     )
 
+    api_endpoint = os.environ['API_MAX_ITEMS']
+
+    logger.debug(
+        'API endpoint: %s',
+        api_endpoint,
+    )
+
+    api_pagination_max_str = os.environ['API_PAGINATION_MAX']
+    api_pagination_max = int(
+        api_pagination_max_str,
+    )
+
+    logger.debug(
+        'API pagination: maximum amount of objects to return: %i',
+        api_pagination_max,
+    )
+
+    api_pagination_min_str = os.environ['API_PAGINATION_MIN']
+    api_pagination_min = int(
+        api_pagination_min_str,
+    )
+
+    logger.debug(
+        'API pagination: minimum amount of objects to return: %i',
+        api_pagination_min,
+    )
+
     github_owner = os.environ['GITHUB_OWNER']
     github_repo = os.environ['GITHUB_REPO']
 
@@ -64,6 +91,10 @@ def entry_point(context, event, handler):
     config = {
         'API': {
             'endpoint': api_endpoint,
+            'pagination': {
+                'max': api_pagination_max,
+                'min': api_pagination_min,
+            },
         },
         'AWS': {
             'region': os.environ['AWS_REGION'],
