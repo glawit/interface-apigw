@@ -45,13 +45,6 @@ def entry_point(context, event, handler):
         api_endpoint,
     )
 
-    api_endpoint = os.environ['API_MAX_ITEMS']
-
-    logger.debug(
-        'API endpoint: %s',
-        api_endpoint,
-    )
-
     api_pagination_max_str = os.environ['API_PAGINATION_MAX']
     api_pagination_max = int(
         api_pagination_max_str,
