@@ -38,6 +38,13 @@ def entry_point(context, event, handler):
         domain_name,
     )
 
+    api_endpoint = f'https://{domain_name}'
+
+    logger.debug(
+        'API endpoint: %s',
+        api_endpoint,
+    )
+
     github_owner = os.environ['GITHUB_OWNER']
     github_repo = os.environ['GITHUB_REPO']
 
@@ -47,21 +54,10 @@ def entry_point(context, event, handler):
         github_repo,
     )
 
-    body = event['body']
-    headers = event['headers']
-    is_base64_encoded = event['isBase64Encoded']
-
-    if is_base64_encoded:
-        logger.debug(
-            'request body is Base64-encoded',
-        )
-
-        body = base64.b64decode(
-            body,
-            validate=True,
-        )
-
     config = {
+        'API': {
+            'endpoint': api_endpoint,
+        },
         'AWS': {
             'region': os.environ['AWS_REGION'],
         },
@@ -75,11 +71,33 @@ def entry_point(context, event, handler):
         },
     }
 
+    body = event.get(
+        'body',
+    )
+    headers = event['headers']
+    is_base64_encoded = event['isBase64Encoded']
+    path_variables = event.get(
+        'pathParameters',
+    )
+    urlparams = event.get(
+        'queryStringParameters',
+    )
+
+    if is_base64_encoded:
+        logger.debug(
+            'request body is Base64-encoded',
+        )
+
+        body = base64.b64decode(
+            body,
+            validate=True,
+        )
+
     request = {
         'body': body,
         'headers': headers,
-        'path_variables': event['pathParameters'],
-        'urlparams': event['queryStringParameters'],
+        'path_variables': path_variables,
+        'urlparams': urlparams,
     }
 
     session = {
