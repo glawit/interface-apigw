@@ -6,6 +6,9 @@ import boto3
 
 import glawit.core.main
 
+boto3_session = boto3.session.Session(
+)
+
 logger = logging.getLogger(
 )
 
@@ -72,8 +75,11 @@ def entry_point(context, event, handler):
         'headers': headers,
     }
 
-    session = boto3.session.Session(
-    )
+    session = {
+        'boto3': {
+            'session': boto3_session,
+        },
+    }
 
     return_value = glawit.core.main.process_request(
         config=config,
@@ -81,6 +87,8 @@ def entry_point(context, event, handler):
         request=request,
         session=session,
     )
+
+    return_value['isBase64Encoded'] = False
 
     return return_value
 
