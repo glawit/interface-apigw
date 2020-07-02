@@ -19,7 +19,6 @@ top_logger_names = {
 }
 
 
-# Common entry point for Lambda functions invoked by API Gateway
 def entry_point(context, event, handler):
     stage_variables = event['stageVariables']
 
@@ -30,6 +29,13 @@ def entry_point(context, event, handler):
 
     set_up_logging(
         level=logging_level,
+    )
+
+    domain_name = event['requestContext']['domainName']
+
+    logger.debug(
+        'domain name: %s',
+        domain_name,
     )
 
     github_owner = os.environ['GITHUB_OWNER']
@@ -43,7 +49,6 @@ def entry_point(context, event, handler):
 
     body = event['body']
     headers = event['headers']
-
     is_base64_encoded = event['isBase64Encoded']
 
     if is_base64_encoded:
@@ -73,6 +78,8 @@ def entry_point(context, event, handler):
     request = {
         'body': body,
         'headers': headers,
+        'path_variables': event['pathParameters'],
+        'urlparams': event['queryStringParameters'],
     }
 
     session = {
