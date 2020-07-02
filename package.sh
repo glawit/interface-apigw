@@ -48,12 +48,7 @@ docker \
 	#
 
 docker \
-	container \
-	stop \
-	-- \
-	"${container_id}"
-
-docker \
 	rm \
+	--force \
 	-- \
 	"${container_id}"
