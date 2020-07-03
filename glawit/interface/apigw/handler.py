@@ -16,6 +16,17 @@ logger = logging.getLogger(
 )
 
 
+def add_boto3_client(
+            client_dict,
+            client_name,
+        ):
+    boto3_client = boto3.client(
+        client_name,
+    )
+
+    client_dict[client_name] = boto3_client
+
+
 add_boto3_client(
     boto3_clients,
     'dynamodb',
@@ -220,14 +231,3 @@ def bind_entry_point(
         return response
 
     return bound_entry_point
-
-
-def add_boto3_client(
-            client_dict,
-            client_name,
-        ):
-    boto3_client = boto3.client(
-        client_name,
-    )
-
-    client_dict[client_name] = boto3_client
