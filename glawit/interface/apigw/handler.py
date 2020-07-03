@@ -22,13 +22,8 @@ def entry_point(context, event, handler):
         stage_variables['logging_level'],
     )
 
-    # FIXME
-    #log_everything = stage_variables['log_everything']
-    log_everything = True
-
     glawit.interface.apigw.logging.set_up(
         level=logging_level,
-        log_everything=log_everything,
     )
 
     domain_name = event['requestContext']['domainName']

@@ -1,23 +1,16 @@
 import logging
 import sys
 
-# Top logger object based on whether everything should be logged
-top_logger_names = {
-    False: 'glawit',
-    True: None,
-}
 
-
-def set_up(level, log_everything):
-    top_logger_name = top_logger_names[log_everything]
-
+def set_up(level):
     top_logger = logging.getLogger(
-        name=top_logger_name,
+        name=None,
     )
 
-    top_logger.setLevel(
-        level,
-    )
+    for existing_handler in top_logger.handlers:
+        top_logger.removeHandler(
+            existing_handler,
+        )
 
     handler = logging.StreamHandler(
         stream=sys.stderr,
@@ -35,4 +28,8 @@ def set_up(level, log_everything):
 
     top_logger.addHandler(
         handler,
+    )
+
+    top_logger.setLevel(
+        level,
     )
