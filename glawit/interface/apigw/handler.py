@@ -4,37 +4,24 @@ import os
 
 import boto3
 
+import glawit.core.boto3
 import glawit.core.main
-import glawit.core.session
 import glawit.interface.apigw.logging
 
-boto3_clients = {
+boto3_session = glawit.core.boto3.Boto3Session(
+    clients=[
+        'dynamodb',
+        's3',
+    ],
+    session=boto3.session.Session(
+    ),
+)
+
+config = {
 }
 
 logger = logging.getLogger(
     __name__,
-)
-
-
-def add_boto3_client(
-            client_dict,
-            client_name,
-        ):
-    boto3_client = boto3.client(
-        client_name,
-    )
-
-    client_dict[client_name] = boto3_client
-
-
-add_boto3_client(
-    boto3_clients,
-    'dynamodb',
-)
-
-add_boto3_client(
-    boto3_clients,
-    's3',
 )
 
 logging_level = logging.DEBUG
@@ -42,6 +29,10 @@ logging_level = logging.DEBUG
 glawit.interface.apigw.logging.set_up(
     level=logging_level,
 )
+
+config['AWS'] = {
+    'region': os.environ['AWS_REGION'],
+}
 
 api_pagination_max_str = os.environ['API_PAGINATION_MAX']
 api_pagination_max = int(
@@ -63,6 +54,13 @@ logger.debug(
     api_pagination_min,
 )
 
+config['API'] = {
+    'pagination': {
+        'max': api_pagination_max,
+        'min': api_pagination_min,
+    },
+}
+
 github_owner = os.environ['GITHUB_OWNER']
 github_repo = os.environ['GITHUB_REPO']
 
@@ -72,6 +70,30 @@ logger.debug(
     github_repo,
 )
 
+config['GitHub'] = {
+    'owner': github_owner,
+    'repo': github_repo,
+}
+
+lfs_bucket = os.environ['STORE_BUCKET']
+
+logger.debug(
+    'LFS bucket: %s',
+    lfs_bucket,
+)
+
+lfs_storage_class = os.environ['STORAGE_CLASS']
+
+logger.debug(
+    'LFS storage class: %s',
+    lfs_storage_class,
+)
+
+config['large_file_store'] = {
+    'bucket_name': lfs_bucket,
+    'storage_class': lfs_storage_class,
+}
+
 locktable = os.environ['LOCKTABLE']
 
 logger.debug(
@@ -79,22 +101,7 @@ logger.debug(
     locktable,
 )
 
-config = {
-    'API': {
-        'pagination': {
-            'max': api_pagination_max,
-            'min': api_pagination_min,
-        },
-    },
-    'AWS': {
-        'region': os.environ['AWS_REGION'],
-    },
-    'GitHub': {
-        'owner': github_owner,
-        'repo': github_repo,
-    },
-    'locktable': locktable,
-}
+config['locktable']: locktable
 
 
 def entry_point(
@@ -119,25 +126,6 @@ def entry_point(
     )
 
     config['API']['endpoint'] = api_endpoint
-
-    lfs_bucket = stage_variables['store_bucket']
-
-    logger.debug(
-        'LFS bucket: %s',
-        lfs_bucket,
-    )
-
-    lfs_storage_class = stage_variables['storage_class']
-
-    logger.debug(
-        'LFS storage class: %s',
-        lfs_storage_class,
-    )
-
-    config['large_file_store'] = {
-        'bucket_name': lfs_bucket,
-        'storage_class': lfs_storage_class,
-    }
 
     headers = event['headers']
     is_base64_encoded = event['isBase64Encoded']
@@ -195,20 +183,11 @@ def entry_point(
 
         request['urlparams'] = query_string_parameters
 
-    session = {
-        'boto3': {
-            'session': boto3_session,
-        },
-    }
-    session = glawit.core.session.Session(
-        boto3_clients=boto3_clients,
-    )
-
     return_value = glawit.core.main.process_request(
+        boto3_session=boto3_session,
         config=config,
         handler=handler,
         request=request,
-        session=session,
     )
 
     return_value['isBase64Encoded'] = False
