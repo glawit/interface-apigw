@@ -15,7 +15,11 @@ logger = logging.getLogger(
 )
 
 
-def entry_point(context, event, handler):
+def entry_point(
+            context,
+            event,
+            handler,
+        ):
     stage_variables = event['stageVariables']
 
     logging_level = getattr(
@@ -188,7 +192,10 @@ def entry_point(context, event, handler):
 
 
 def bind_entry_point(handler):
-    def bound_entry_point(event, context):
+    def bound_entry_point(
+                event,
+                context,
+            ):
         response = entry_point(
             context=context,
             event=event,

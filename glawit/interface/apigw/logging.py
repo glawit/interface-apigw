@@ -2,7 +2,9 @@ import logging
 import sys
 
 
-def set_up(level):
+def set_up(
+            level,
+        ):
     top_logger = logging.getLogger(
         name=None,
     )
