@@ -11,6 +11,7 @@ boto3_session = boto3.session.Session(
 )
 
 logger = logging.getLogger(
+    __name__,
 )
 
 
