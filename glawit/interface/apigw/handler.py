@@ -43,20 +43,6 @@ glawit.interface.apigw.logging.set_up(
     level=logging_level,
 )
 
-domain_name = event['requestContext']['domainName']
-
-logger.debug(
-    'domain name: %s',
-    domain_name,
-)
-
-api_endpoint = f'https://{domain_name}'
-
-logger.debug(
-    'API endpoint: %s',
-    api_endpoint,
-)
-
 api_pagination_max_str = os.environ['API_PAGINATION_MAX']
 api_pagination_max = int(
     api_pagination_max_str,
@@ -95,7 +81,6 @@ logger.debug(
 
 config = {
     'API': {
-        'endpoint': api_endpoint,
         'pagination': {
             'max': api_pagination_max,
             'min': api_pagination_min,
@@ -118,6 +103,22 @@ def entry_point(
             handler,
         ):
     stage_variables = event['stageVariables']
+
+    domain_name = event['requestContext']['domainName']
+
+    logger.debug(
+        'domain name: %s',
+        domain_name,
+    )
+
+    api_endpoint = f'https://{domain_name}'
+
+    logger.debug(
+        'API endpoint: %s',
+        api_endpoint,
+    )
+
+    config['API']['endpoint'] = api_endpoint
 
     lfs_bucket = stage_variables['store_bucket']
 
