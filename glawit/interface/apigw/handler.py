@@ -101,7 +101,7 @@ logger.debug(
     locktable,
 )
 
-config['locktable']: locktable
+config['locktable'] = locktable
 
 
 def entry_point(
@@ -109,8 +109,6 @@ def entry_point(
             event,
             handler,
         ):
-    stage_variables = event['stageVariables']
-
     domain_name = event['requestContext']['domainName']
 
     logger.debug(
