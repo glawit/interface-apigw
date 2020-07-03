@@ -5,14 +5,100 @@ import os
 import boto3
 
 import glawit.core.main
+import glawit.core.session
 import glawit.interface.apigw.logging
 
-boto3_session = boto3.session.Session(
-)
+boto3_clients = {
+}
 
 logger = logging.getLogger(
     __name__,
 )
+
+
+add_boto3_client(
+    boto3_clients,
+    'dynamodb',
+)
+
+add_boto3_client(
+    boto3_clients,
+    's3',
+)
+
+logging_level = logging.DEBUG
+
+glawit.interface.apigw.logging.set_up(
+    level=logging_level,
+)
+
+domain_name = event['requestContext']['domainName']
+
+logger.debug(
+    'domain name: %s',
+    domain_name,
+)
+
+api_endpoint = f'https://{domain_name}'
+
+logger.debug(
+    'API endpoint: %s',
+    api_endpoint,
+)
+
+api_pagination_max_str = os.environ['API_PAGINATION_MAX']
+api_pagination_max = int(
+    api_pagination_max_str,
+)
+
+logger.debug(
+    'API pagination: maximum amount of objects to return: %i',
+    api_pagination_max,
+)
+
+api_pagination_min_str = os.environ['API_PAGINATION_MIN']
+api_pagination_min = int(
+    api_pagination_min_str,
+)
+
+logger.debug(
+    'API pagination: minimum amount of objects to return: %i',
+    api_pagination_min,
+)
+
+github_owner = os.environ['GITHUB_OWNER']
+github_repo = os.environ['GITHUB_REPO']
+
+logger.debug(
+    'GitHub repository: %s/%s',
+    github_owner,
+    github_repo,
+)
+
+locktable = os.environ['LOCKTABLE']
+
+logger.debug(
+    'locktable: %s',
+    locktable,
+)
+
+config = {
+    'API': {
+        'endpoint': api_endpoint,
+        'pagination': {
+            'max': api_pagination_max,
+            'min': api_pagination_min,
+        },
+    },
+    'AWS': {
+        'region': os.environ['AWS_REGION'],
+    },
+    'GitHub': {
+        'owner': github_owner,
+        'repo': github_repo,
+    },
+    'locktable': locktable,
+}
 
 
 def entry_point(
@@ -21,58 +107,6 @@ def entry_point(
             handler,
         ):
     stage_variables = event['stageVariables']
-
-    logging_level = getattr(
-        logging,
-        stage_variables['logging_level'],
-    )
-
-    glawit.interface.apigw.logging.set_up(
-        level=logging_level,
-    )
-
-    domain_name = event['requestContext']['domainName']
-
-    logger.debug(
-        'domain name: %s',
-        domain_name,
-    )
-
-    api_endpoint = f'https://{domain_name}'
-
-    logger.debug(
-        'API endpoint: %s',
-        api_endpoint,
-    )
-
-    api_pagination_max_str = os.environ['API_PAGINATION_MAX']
-    api_pagination_max = int(
-        api_pagination_max_str,
-    )
-
-    logger.debug(
-        'API pagination: maximum amount of objects to return: %i',
-        api_pagination_max,
-    )
-
-    api_pagination_min_str = os.environ['API_PAGINATION_MIN']
-    api_pagination_min = int(
-        api_pagination_min_str,
-    )
-
-    logger.debug(
-        'API pagination: minimum amount of objects to return: %i',
-        api_pagination_min,
-    )
-
-    github_owner = os.environ['GITHUB_OWNER']
-    github_repo = os.environ['GITHUB_REPO']
-
-    logger.debug(
-        'GitHub repository: %s/%s',
-        github_owner,
-        github_repo,
-    )
 
     lfs_bucket = stage_variables['store_bucket']
 
@@ -88,33 +122,9 @@ def entry_point(
         lfs_storage_class,
     )
 
-    locktable = os.environ['LOCKTABLE']
-
-    logger.debug(
-        'locktable: %s',
-        locktable,
-    )
-
-    config = {
-        'API': {
-            'endpoint': api_endpoint,
-            'pagination': {
-                'max': api_pagination_max,
-                'min': api_pagination_min,
-            },
-        },
-        'AWS': {
-            'region': os.environ['AWS_REGION'],
-        },
-        'GitHub': {
-            'owner': github_owner,
-            'repo': github_repo,
-        },
-        'large_file_store': {
-            'bucket_name': lfs_bucket,
-            'storage_class': lfs_storage_class,
-        },
-        'locktable': locktable,
+    config['large_file_store'] = {
+        'bucket_name': lfs_bucket,
+        'storage_class': lfs_storage_class,
     }
 
     headers = event['headers']
@@ -178,6 +188,9 @@ def entry_point(
             'session': boto3_session,
         },
     }
+    session = glawit.core.session.Session(
+        boto3_clients=boto3_clients,
+    )
 
     return_value = glawit.core.main.process_request(
         config=config,
@@ -191,7 +204,9 @@ def entry_point(
     return return_value
 
 
-def bind_entry_point(handler):
+def bind_entry_point(
+            handler,
+        ):
     def bound_entry_point(
                 event,
                 context,
@@ -205,3 +220,14 @@ def bind_entry_point(handler):
         return response
 
     return bound_entry_point
+
+
+def add_boto3_client(
+            client_dict,
+            client_name,
+        ):
+    boto3_client = boto3.client(
+        client_name,
+    )
+
+    client_dict[client_name] = boto3_client
