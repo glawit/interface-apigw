@@ -70,6 +70,20 @@ def entry_point(context, event, handler):
         github_repo,
     )
 
+    lfs_bucket = stage_variables['store_bucket']
+
+    logger.debug(
+        'LFS bucket: %s',
+        lfs_bucket,
+    )
+
+    lfs_storage_class = stage_variables['storage_class']
+
+    logger.debug(
+        'LFS storage class: %s',
+        lfs_storage_class,
+    )
+
     locktable = os.environ['LOCKTABLE']
 
     logger.debug(
@@ -93,8 +107,8 @@ def entry_point(context, event, handler):
             'repo': github_repo,
         },
         'large_file_store': {
-            'bucket_name': stage_variables['store_bucket'],
-            'storage_class': stage_variables['storage_class'],
+            'bucket_name': lfs_bucket,
+            'storage_class': lfs_storage_class,
         },
         'locktable': locktable,
     }
