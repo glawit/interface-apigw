@@ -8,7 +8,7 @@ import glawit.core.boto3
 import glawit.core.main
 import glawit.interface.apigw.logging
 
-boto3_session = glawit.core.boto3.Boto3Session(
+boto3_session = glawit.core.boto3.Session(
     clients=[
         'dynamodb',
         's3',
