@@ -8,18 +8,6 @@ import glawit.core.boto3
 import glawit.core.main
 import glawit.interface.apigw.logging
 
-boto3_session = glawit.core.boto3.Session(
-    clients=[
-        'dynamodb',
-        's3',
-    ],
-    session=boto3.session.Session(
-    ),
-)
-
-config = {
-}
-
 logger = logging.getLogger(
     __name__,
 )
@@ -29,6 +17,9 @@ logging_level = logging.DEBUG
 glawit.interface.apigw.logging.set_up(
     level=logging_level,
 )
+
+config = {
+}
 
 config['AWS'] = {
     'region': os.environ['AWS_REGION'],
@@ -102,6 +93,18 @@ logger.debug(
 )
 
 config['locktable'] = locktable
+
+boto3_session = glawit.core.boto3.Session(
+    clients=[
+        'dynamodb',
+        's3',
+    ],
+    session=boto3.session.Session(
+    ),
+)
+
+requests_session = requests.Session(
+)
 
 
 def entry_point(
@@ -186,6 +189,7 @@ def entry_point(
         config=config,
         handler=handler,
         request=request,
+        requests_session=requests_session,
     )
 
     return_value['isBase64Encoded'] = False
