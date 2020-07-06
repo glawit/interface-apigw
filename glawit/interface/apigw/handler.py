@@ -3,6 +3,7 @@ import logging
 import os
 
 import boto3
+import requests
 
 import glawit.core.boto3
 import glawit.core.main
