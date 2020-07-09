@@ -102,6 +102,7 @@ boto3_session = glawit.core.boto3.Session(
         'dynamodb',
         's3',
     ],
+    region=aws_region,
     session=boto3.session.Session(
         region_name=aws_region,
     ),
