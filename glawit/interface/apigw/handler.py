@@ -19,11 +19,13 @@ glawit.interface.apigw.logging.set_up(
     level=logging_level,
 )
 
+aws_region = os.environ['AWS_REGION']
+
 config = {
 }
 
 config['AWS'] = {
-    'region': os.environ['AWS_REGION'],
+    'region': aws_region,
 }
 
 api_pagination_max_str = os.environ['API_PAGINATION_MAX']
@@ -101,6 +103,7 @@ boto3_session = glawit.core.boto3.Session(
         's3',
     ],
     session=boto3.session.Session(
+        region_name=aws_region,
     ),
 )
 
